@@ -2,6 +2,7 @@ class User < ApplicationRecord
     # has_secure_password takes the password, encrypts it, and stores the hashed value in the password_digest column.
     has_secure_password
     validates_presence_of :first_name, :email, :password
+    validates_uniqueness_of :email
 end
 
 # has_secure_password

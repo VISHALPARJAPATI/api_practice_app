@@ -1,6 +1,7 @@
 require_relative "boot"
 
 require "rails"
+
 # Pick the frameworks you want:
 require "active_model/railtie"
 require "active_job/railtie"
@@ -12,6 +13,8 @@ require "action_mailbox/engine"
 require "action_text/engine"
 require "action_view/railtie"
 require "action_cable/engine"
+require_relative "../lib/middleware/authentication"
+
 # require "rails/test_unit/railtie"
 
 # Require the gems listed in Gemfile, including any gems
@@ -20,7 +23,6 @@ Bundler.require(*Rails.groups)
 
 module Myapi
   class Application < Rails::Application
-    # Initialize configuration defaults for originally generated Rails version.
     config.load_defaults 7.0
 
     # Configuration for the application, engines, and railties goes here.
@@ -34,6 +36,7 @@ module Myapi
     # Only loads a smaller set of middleware suitable for API only apps.
     # Middleware like session, flash, cookies can be added back manually.
     # Skip views, helpers and assets when generating a new resource.
+    config.middleware.use Middleware::Authentication
     config.api_only = true
   end
 end
