@@ -39,8 +39,13 @@ class UsersController < ApplicationController
     end
   end
 
+  # logout the user
+  # we add the token to the revoked token table such that this token will not be none of use.
   def logout
+    token = @authentication_middleware.extract_token(request.env)
+    RevokedToken.create(token: token)
 
+    render json: { message: 'Logged out successfully' }
   end
 
   private
