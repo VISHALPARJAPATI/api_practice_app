@@ -1,4 +1,6 @@
 class ApplicationController < ActionController::API
+    include ExceptionHandler
+    
     before_action :set_middleware_instance
 
     def authenticate_user
@@ -11,7 +13,7 @@ class ApplicationController < ActionController::API
 
     private
 
-    # # Creating an instance of the Middleware::Authentication class to access the methods within this class.
+    # Creating an instance of the Middleware::Authentication class to access the methods within this class.
     def set_middleware_instance
       @authentication_middleware = Middleware::Authentication.new(nil)
     end

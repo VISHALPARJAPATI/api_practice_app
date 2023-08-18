@@ -2,6 +2,7 @@
 
 module Middleware
     class Authentication
+      
       def initialize(app)
         @app = app
       end
@@ -13,7 +14,9 @@ module Middleware
             decoded_token = decode_and_verify_token(token)
             if decoded_token
                 user_id = decoded_token[0]["user_id"]
-                env["current_user"] = User.find(user_id) if user_id.present?
+                if user_id && (user = User.find_by(id: user_id))
+                  env["current_user"] = user
+                end
             end
         end
     
