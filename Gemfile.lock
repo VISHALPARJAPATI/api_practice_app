@@ -79,6 +79,11 @@ GEM
       reline (>= 0.3.1)
     diff-lcs (1.5.0)
     erubi (1.12.0)
+    factory_bot (6.2.1)
+      activesupport (>= 5.0.0)
+    factory_bot_rails (6.2.0)
+      factory_bot (~> 6.2.0)
+      railties (>= 5.0.0)
     globalid (1.1.0)
       activesupport (>= 5.0)
     i18n (1.14.1)
@@ -184,6 +189,7 @@ DEPENDENCIES
   bootsnap
   byebug
   debug
+  factory_bot_rails
   jwt
   mysql2 (~> 0.5)
   puma (~> 5.0)

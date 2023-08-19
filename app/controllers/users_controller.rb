@@ -38,12 +38,7 @@ class UsersController < ApplicationController
   def login
     user = User.find_by(email: user_params[:email])
     if user && user.authenticate(user_params[:password])
-      # Generate a token with the user's ID
-      hmac_secret = Rails.application.secrets.secret_key_base
-      exp_time = exp = Time.now.to_i + 4 * 3600 # token will expire after 4 hours
-      payload = { user_id: user.id, exp: exp_time }
-
-      token = JWT.encode(payload, hmac_secret, 'HS256')
+      token = user.generate_jwt_token
 
       render json: { token: token }
     else

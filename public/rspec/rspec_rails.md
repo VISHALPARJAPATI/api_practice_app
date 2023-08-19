@@ -36,3 +36,5 @@
 7. Command to run testcases with the format option.
 
 rspec spec/models/user_spec.rb --format documentation
+
+8. rails g factory_bot:model User

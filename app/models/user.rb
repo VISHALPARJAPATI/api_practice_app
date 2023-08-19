@@ -7,6 +7,15 @@ class User < ApplicationRecord
     def full_name
         "#{first_name} #{last_name}"
     end
+
+    # generate JWT token for user
+    def generate_jwt_token
+      hmac_secret = Rails.application.secrets.secret_key_base
+      exp_time = exp = Time.now.to_i + 4 * 3600 # token will expire after 4 hours
+      payload = { user_id: id, exp: exp_time }
+
+      JWT.encode(payload, hmac_secret, 'HS256')
+    end
 end
 
 # has_secure_password
