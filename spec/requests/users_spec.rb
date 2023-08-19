@@ -8,8 +8,7 @@ RSpec.describe "Users", type: :request do
       it "returns Unauthorized" do 
         expect(response).to have_http_status(:unauthorized)
         json_response = JSON.parse(response.body)
-        expect(json_response).to have_key("error")
-        expect(json_response.dig("error")).to eq("Unauthorized")
+        expect(json_response).to include("error" => "Unauthorized")
       end
 
       it "returns JSON content type" do 
@@ -21,16 +20,14 @@ RSpec.describe "Users", type: :request do
       let(:user) { FactoryBot.create(:user) }
       let(:auth_headers) { { "Authorization" => "Bearer #{user.generate_jwt_token}" } }
 
-      before do
-        FactoryBot.create_list(:user, 3)
-        get "/users", headers: auth_headers
-      end
+      before { FactoryBot.create_list(:user, 3) }
+
+      before { get "/users", headers: auth_headers }
 
       it "returns all users" do
         expect(response).to have_http_status(:ok)
         json_response = JSON.parse(response.body)
-        expect(json_response).to have_key("data")
-        expect(json_response["data"]).to have_key("users")
+        expect(json_response).to include("data" => hash_including("users" => an_instance_of(Array)))
         expect(json_response.dig("data", "users").count).to eq(4)
       end
     end
@@ -43,9 +40,7 @@ RSpec.describe "Users", type: :request do
       post "/users", params: { user: user_params }
 
       json_response = JSON.parse(response.body)
-      expect(json_response).to have_key("data")
-      expect(json_response["data"]).to have_key("user")
-      expect(json_response.dig("data", "user")).to be_present
+      expect(json_response).to include("data" => hash_including("user" => an_instance_of(Hash)))
       expect(response).to have_http_status(:ok)
     end
 
@@ -54,10 +49,7 @@ RSpec.describe "Users", type: :request do
       post "/users", params: { user: user_params }
 
       json_response = JSON.parse(response.body)
-      expect(json_response).to have_key("errors")
-      
-      errors = json_response["errors"]
-      expect(errors).to include("first_name" => ["can't be blank"])
+      expect(json_response).to include("errors" => hash_including("first_name" => ["can't be blank"]))
       expect(response).to have_http_status(:unprocessable_entity)
     end
   end
@@ -70,8 +62,7 @@ RSpec.describe "Users", type: :request do
 
       it "returns unauthorized" do 
         json_response = JSON.parse(response.body)
-        expect(json_response.dig("error")).to eq("Unauthorized")
-        expect(json_response).to have_key("error")
+        expect(json_response).to include("error" => "Unauthorized")
         expect(response).to have_http_status(:unauthorized)
       end
     end
@@ -84,16 +75,14 @@ RSpec.describe "Users", type: :request do
 
         it "returns user" do 
           json_response = JSON.parse(response.body)
-          expect(json_response).to have_key("data")
-          expect(json_response.dig("data")).to have_key("user")
-          expect(json_response.dig("data", "user")).to be_present
+          expect(json_response).to include("data" => hash_including("user" => an_instance_of(Hash)))
         end
       end
   
-      context "when user does not exists" do 
+      context "when user does not exist" do 
         before { get "/users/100001", headers: auth_headers }
 
-        it "should return not found" do
+        it "returns not found" do
           expect(response).to have_http_status(:not_found)
         end
       end
@@ -110,8 +99,7 @@ RSpec.describe "Users", type: :request do
 
         expect(response).to have_http_status(:unauthorized)
         json_response = JSON.parse(response.body)
-        expect(json_response).to have_key("error")
-        expect(json_response.dig("error")).to eq("Unauthorized")
+        expect(json_response).to include("error" => "Unauthorized")
       end
 
       it "returns Unauthorized with params" do 
@@ -119,8 +107,7 @@ RSpec.describe "Users", type: :request do
 
         expect(response).to have_http_status(:unauthorized)
         json_response = JSON.parse(response.body)
-        expect(json_response).to have_key("error")
-        expect(json_response.dig("error")).to eq("Unauthorized")
+        expect(json_response).to include("error" => "Unauthorized")
       end
     end
 
@@ -137,10 +124,7 @@ RSpec.describe "Users", type: :request do
   
           it "updates user" do
             json_response = JSON.parse(response.body)
-            expect(json_response).to have_key("data")
-            expect(json_response.dig("data")).to have_key("user")
-            expect(json_response.dig("data", "user")).to be_present
-            expect(json_response.dig("data", "message")).to eq("User updated successfully.")
+            expect(json_response).to include("data" => hash_including("user" => an_instance_of(Hash), "message" => "User updated successfully."))
             expect(json_response.dig("data", "user", "first_name")).to eq("updated name")
             expect(json_response.dig("data", "user", "id")).to eq(user.id)
             expect(response).to have_http_status(:ok)
@@ -157,19 +141,16 @@ RSpec.describe "Users", type: :request do
   
           it "does not update already taken email" do
             json_response = JSON.parse(response.body)
-            expect(json_response).to have_key("errors")
-            
-            errors = json_response["errors"]
-            expect(errors).to include("email" => ["has already been taken"])
+            expect(json_response).to include("errors" => hash_including("email" => ["has already been taken"]))
             expect(response).to have_http_status(:unprocessable_entity)
           end
         end
       end
 
-      context "when user does not exists" do 
+      context "when user does not exist" do 
         before { patch "/users/100001", headers: auth_headers }
 
-        it "should return not found" do
+        it "returns not found" do
           expect(response).to have_http_status(:not_found)
         end
       end
@@ -180,37 +161,37 @@ RSpec.describe "Users", type: :request do
     let(:user) { FactoryBot.create(:user) }
 
     context "when not authenticated" do
-      it "should return unauthorized" do
+      it "returns unauthorized" do
         delete "/users/#{user.id}"
 
         expect(response).to have_http_status(:unauthorized)
         json_response = JSON.parse(response.body)
-        expect(json_response).to have_key("error")
-        expect(json_response.dig("error")).to eq("Unauthorized")
+        expect(json_response).to include("error" => "Unauthorized")
       end
     end
 
     context "when authenticated" do
-      let(:auth_headers) { { "Authorization" => "Bearere #{user.generate_jwt_token}" } }
+      let(:auth_headers) { { "Authorization" => "Bearer #{user.generate_jwt_token}" } }
 
       context "when user exists" do
         before { delete "/users/#{user.id}", headers: auth_headers }
 
-        it "should delete the existed user" do
+        it "deletes the existing user" do
           expect(response).to have_http_status(:no_content)
         end
       end
 
-      context "when user does not exists" do 
+      context "when user does not exist" do 
         before { delete "/users/100001", headers: auth_headers }
         
-        it "should return not found" do
+        it "returns not found" do
           expect(response).to have_http_status(:not_found)
         end
       end
     end
   end
 end
+
 
 
 # NOTE: Whenever a test case runs, it operates within a transaction. Any data added to the database during the test case is rolled back
