@@ -1,5 +1,4 @@
 class UsersController < ApplicationController
-  include RenderJson
   
   before_action :authenticate_user, except: [:login, :create]
   before_action :get_user, only: [:show, :update, :destroy]

@@ -4,7 +4,7 @@ RSpec.describe User, type: :model do
   # NOTE: In the future, we can use the before(:example) block instead of subject to include more complex logic that needs
   # to be executed before each test case and remains accessible across all test cases.
 
-  subject(:user) { User.new(first_name: 'John', email: 'john@example.com', password: '1234') }
+  subject(:user) { FactoryBot.build(:user) }
 
   # user is not valid, if firstname is blank
   it "should not be valid without a first name" do
@@ -28,16 +28,14 @@ RSpec.describe User, type: :model do
   # user is not valid, if email is duplicate (has already been taken)
   it "should not be valid for duplicate email" do
     user.save
-    duplicate_email_user = User.new(first_name: 'Jane', email: 'john@example.com', password: '1234')
+    duplicate_email_user = User.new(first_name: 'Duplicate email user', email: user.email, password: '1234')
 
     expect(duplicate_email_user).to_not be_valid
   end
 
   # full_name instance method, should returns the full_name
   it "should returns the full_name" do
-    user.last_name = "jatt"
-
-    expect(user.full_name).to eq("John jatt")
+    expect(user.full_name).to eq("#{user.first_name} #{user.last_name}")
   end
 end
 
