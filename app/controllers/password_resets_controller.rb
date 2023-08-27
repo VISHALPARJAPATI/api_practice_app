@@ -1,5 +1,5 @@
 class PasswordResetsController < ActionController::Base
-  include UserFinder
+  include ExceptionHandler, UserFinder
   
   before_action :get_user_by_email, only: :send_reset_password_email
   before_action :get_user, only: [:reset_password, :update_password]
@@ -7,7 +7,7 @@ class PasswordResetsController < ActionController::Base
 
   # Sends a reset password email to the user.
   def send_reset_password_email
-    UserMailer.send_reset_password_email(@user).deliver_now
+    UserMailer.send_reset_password_email(@user).deliver_later
     render json: { message: 'A verification email has been sent to you.' }, status: :ok
   end
 
@@ -18,8 +18,7 @@ class PasswordResetsController < ActionController::Base
 
   # Updates the user's password after the reset.
   def update_password
-    @user = User.find params[:id]
-
+    
     if @user.update(password: params[:password])
       render plain: 'Password reset successful!'
     else
@@ -33,7 +32,7 @@ class PasswordResetsController < ActionController::Base
     @user = User.find_by(email: params[:email])
     
     unless @user.present?
-     render json: { errors: { base: [ "This email is not registered with us." ] } }, status: :unprocessable_entity
+     render json: { errors: { base: ["This email is not registered with us."] } }, status: :unprocessable_entity
     end
   end
 

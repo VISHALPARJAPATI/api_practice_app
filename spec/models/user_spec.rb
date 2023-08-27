@@ -37,6 +37,18 @@ RSpec.describe User, type: :model do
   it "should returns the full_name" do
     expect(user.full_name).to eq("#{user.first_name} #{user.last_name}")
   end
+
+  it "reset_token should be nil by default" do
+    expect(user.reset_token).to eq(nil)
+    expect(user.reset_token_expires_at).to eq(nil)
+  end
+
+  it "should return the reset_token" do
+    token = user.generate_reset_token # here we are, generating the token and saving the user
+
+    expect(user.reset_token).not_to eq(nil)
+    expect(user.reset_token).to eq(token)
+  end
 end
 
 # command to run this particular spec: rspec spec/models/user_spec.rb --format documentation

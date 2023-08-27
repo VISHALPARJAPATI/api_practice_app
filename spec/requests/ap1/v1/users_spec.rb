@@ -1,9 +1,9 @@
 require 'rails_helper'
 
-RSpec.describe "Users", type: :request do
+RSpec.describe "Api::V1::Users", type: :request do
   describe "GET /index" do
     context "when not authenticated" do
-      before { get "/users" }
+      before { get "/api/v1/users" }
 
       it "returns Unauthorized" do 
         expect(response).to have_http_status(:unauthorized)
@@ -22,7 +22,7 @@ RSpec.describe "Users", type: :request do
 
       before { FactoryBot.create_list(:user, 3) }
 
-      before { get "/users", headers: auth_headers }
+      before { get "/api/v1/users", headers: auth_headers }
 
       it "returns all users" do
         expect(response).to have_http_status(:ok)
@@ -37,7 +37,7 @@ RSpec.describe "Users", type: :request do
     let(:user_params) { FactoryBot.attributes_for(:user) }
 
     it "creates a user" do 
-      post "/users", params: { user: user_params }
+      post "/api/v1/users", params: { user: user_params }
 
       json_response = JSON.parse(response.body)
       expect(json_response).to include("data" => hash_including("user" => an_instance_of(Hash)))
@@ -46,7 +46,7 @@ RSpec.describe "Users", type: :request do
 
     it "does not create a user" do 
       user_params[:first_name] = nil
-      post "/users", params: { user: user_params }
+      post "/api/v1/users", params: { user: user_params }
 
       json_response = JSON.parse(response.body)
       expect(json_response).to include("errors" => hash_including("first_name" => ["can't be blank"]))
@@ -58,7 +58,7 @@ RSpec.describe "Users", type: :request do
     let(:user) { FactoryBot.create(:user) }
 
     context "when not authenticated" do 
-      before { get "/users/#{user.id}" }
+      before { get "/api/v1/users/#{user.id}" }
 
       it "returns unauthorized" do 
         json_response = JSON.parse(response.body)
@@ -71,7 +71,7 @@ RSpec.describe "Users", type: :request do
       let(:auth_headers) { { "Authorization" => "Bearer #{user.generate_jwt_token}" } }
 
       context "when user exists" do
-        before { get "/users/#{user.id}", headers: auth_headers }
+        before { get "/api/v1/users/#{user.id}", headers: auth_headers }
 
         it "returns user" do 
           json_response = JSON.parse(response.body)
@@ -80,7 +80,7 @@ RSpec.describe "Users", type: :request do
       end
   
       context "when user does not exist" do 
-        before { get "/users/100001", headers: auth_headers }
+        before { get "/api/v1/users/100001", headers: auth_headers }
 
         it "returns not found" do
           expect(response).to have_http_status(:not_found)
@@ -95,7 +95,7 @@ RSpec.describe "Users", type: :request do
     context "when not authenticated" do
   
       it "returns Unauthorized without params" do 
-        patch "/users/#{user.id}", params: { user: FactoryBot.attributes_for(:user) }
+        patch "/api/v1/users/#{user.id}", params: { user: FactoryBot.attributes_for(:user) }
 
         expect(response).to have_http_status(:unauthorized)
         json_response = JSON.parse(response.body)
@@ -103,7 +103,7 @@ RSpec.describe "Users", type: :request do
       end
 
       it "returns Unauthorized with params" do 
-        patch "/users/#{user.id}"
+        patch "/api/v1/users/#{user.id}"
 
         expect(response).to have_http_status(:unauthorized)
         json_response = JSON.parse(response.body)
@@ -119,7 +119,7 @@ RSpec.describe "Users", type: :request do
           let(:user_params) { { "first_name": "updated name" } }
   
           before do
-            patch "/users/#{user.id}", headers: auth_headers, params: { user: user_params }
+            patch "/api/v1/users/#{user.id}", headers: auth_headers, params: { user: user_params }
           end
   
           it "updates user" do
@@ -136,7 +136,7 @@ RSpec.describe "Users", type: :request do
           let(:email_update_user_params) { { "email": old_user.email } }
   
           before do
-            patch "/users/#{user.id}", headers: auth_headers, params: { user: email_update_user_params }
+            patch "/api/v1/users/#{user.id}", headers: auth_headers, params: { user: email_update_user_params }
           end
   
           it "does not update already taken email" do
@@ -148,7 +148,7 @@ RSpec.describe "Users", type: :request do
       end
 
       context "when user does not exist" do 
-        before { patch "/users/100001", headers: auth_headers }
+        before { patch "/api/v1/users/100001", headers: auth_headers }
 
         it "returns not found" do
           expect(response).to have_http_status(:not_found)
@@ -162,7 +162,7 @@ RSpec.describe "Users", type: :request do
 
     context "when not authenticated" do
       it "returns unauthorized" do
-        delete "/users/#{user.id}"
+        delete "/api/v1/users/#{user.id}"
 
         expect(response).to have_http_status(:unauthorized)
         json_response = JSON.parse(response.body)
@@ -174,7 +174,7 @@ RSpec.describe "Users", type: :request do
       let(:auth_headers) { { "Authorization" => "Bearer #{user.generate_jwt_token}" } }
 
       context "when user exists" do
-        before { delete "/users/#{user.id}", headers: auth_headers }
+        before { delete "/api/v1/users/#{user.id}", headers: auth_headers }
 
         it "deletes the existing user" do
           expect(response).to have_http_status(:no_content)
@@ -182,7 +182,7 @@ RSpec.describe "Users", type: :request do
       end
 
       context "when user does not exist" do 
-        before { delete "/users/100001", headers: auth_headers }
+        before { delete "/api/v1/users/100001", headers: auth_headers }
         
         it "returns not found" do
           expect(response).to have_http_status(:not_found)
