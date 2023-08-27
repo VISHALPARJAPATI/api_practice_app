@@ -1,7 +1,8 @@
-class UsersController < ApplicationController
-  
+class Api::V1::UsersController < ApplicationController
+  include UserFinder
+
   before_action :authenticate_user, except: [:login, :create]
-  before_action :get_user, only: [:show, :update, :destroy]
+  before_action :get_user, only: [:show, :update, :destroy, :update_password]
   
   def index
     users = User.all
@@ -32,6 +33,17 @@ class UsersController < ApplicationController
     end
   end
 
+  def destroy
+    @user.destroy
+
+    head :no_content
+
+    # This status code indicates that the server has successfully processed the request, 
+    # but there is no content to send in the response. It's often used for successful deletions
+    # where you don't need to return any additional data. In this case, you would remove the render statement altogether, 
+    # and the response would have a status code of 204.
+  end
+
   # Sign-in
   # this method is responsible for login the user by taking email and password
   def login
@@ -54,24 +66,9 @@ class UsersController < ApplicationController
     render json: { message: 'Logged out successfully' }
   end
 
-  def destroy
-    @user.destroy
-
-    head :no_content
-
-    # This status code indicates that the server has successfully processed the request, 
-    # but there is no content to send in the response. It's often used for successful deletions
-    # where you don't need to return any additional data. In this case, you would remove the render statement altogether, 
-    # and the response would have a status code of 204.
-  end
-
   private
 
   def user_params
     params.require(:user).permit(:first_name, :last_name, :email, :password)
-  end
-
-  def get_user
-    @user = User.find params[:id]
   end
 end

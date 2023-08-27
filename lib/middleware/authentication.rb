@@ -37,7 +37,7 @@ module Middleware
 
       # decode that token
       def decode_and_verify_token(token)
-        hmac_secret = Rails.application.secrets.secret_key_base
+        hmac_secret = Rails.application.credentials.secret_key_base
         begin
             decoded_token = JWT.decode(token, hmac_secret, true, algorithm: 'HS256')
         rescue JWT::DecodeError, JWT::ExpiredSignature

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2023_08_17_111127) do
+ActiveRecord::Schema[7.0].define(version: 2023_08_27_090734) do
   create_table "revoked_tokens", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.string "token"
     t.datetime "created_at", null: false
@@ -25,6 +25,8 @@ ActiveRecord::Schema[7.0].define(version: 2023_08_17_111127) do
     t.string "password_digest"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "reset_token"
+    t.datetime "reset_token_expires_at"
   end
 
 end
