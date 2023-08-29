@@ -1,7 +1,7 @@
 class Api::V1::UsersController < ApplicationController
   include UserFinder
 
-  before_action :authenticate_user, except: [:login, :create]
+  before_action :authenticate_user, except: [:login, :create, :show]
   before_action :get_user, only: [:show, :update, :destroy, :update_password]
   
   def index
@@ -22,7 +22,7 @@ class Api::V1::UsersController < ApplicationController
   end
 
   def show
-    render json: { data: { user: @user } }, status: :ok
+    render json: { data: { user: @user.attributes.merge(profile_pic: @user.profile_pic.url ) } }, status: :ok
   end
 
   def update
@@ -69,6 +69,6 @@ class Api::V1::UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:first_name, :last_name, :email, :password)
+    params.require(:user).permit(:first_name, :last_name, :email, :password, :profile_pic)
   end
 end

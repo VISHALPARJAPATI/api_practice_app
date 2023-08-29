@@ -3,6 +3,8 @@ class User < ApplicationRecord
     validates_presence_of :first_name, :email
     validates_uniqueness_of :email
 
+    has_one_attached :profile_pic # here we are using rails active storage
+
     # this method will return the full_name
     def full_name
         "#{first_name} #{last_name}"
