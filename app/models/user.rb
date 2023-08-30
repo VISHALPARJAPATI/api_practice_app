@@ -1,9 +1,10 @@
 class User < ApplicationRecord
     has_secure_password
-    validates_presence_of :first_name, :email
+    validates_presence_of :first_name, :email, :profile_pic
     validates_uniqueness_of :email
 
     has_one_attached :profile_pic # here we are using rails active storage
+    validate :profile_pic_content_type
 
     # this method will return the full_name
     def full_name
@@ -26,6 +27,13 @@ class User < ApplicationRecord
       self.save
       
       self.reset_token
+    end
+
+    # if uploaded file is not an image then return error......
+    def profile_pic_content_type
+      if profile_pic.attached? && !profile_pic.image?
+        errors.add(:profile_picture, 'must be a JPEG, JPG, or PNG image')
+      end
     end
 end
 

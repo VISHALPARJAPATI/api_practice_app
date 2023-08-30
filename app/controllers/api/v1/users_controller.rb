@@ -1,7 +1,7 @@
 class Api::V1::UsersController < ApplicationController
   include UserFinder
 
-  before_action :authenticate_user, except: [:login, :create, :show]
+  before_action :authenticate_user, except: [:login, :create]
   before_action :get_user, only: [:show, :update, :destroy, :update_password]
   
   def index
