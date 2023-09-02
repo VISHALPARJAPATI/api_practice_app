@@ -14,12 +14,41 @@ class Api::V1::UsersController < ApplicationController
   # create/register a user
   def create
     user = User.new(user_params)
-    if user.save 
+  
+    if user.save
+      if params[:user][:profile_pic].present?
+        temp_file = params[:user][:profile_pic].tempfile
+  
+        # "profile_pic"=>#<ActionDispatch::Http::UploadedFile:0x0000000105016d90 @tempfile=#<Tempfile:/var/folders/t5/962r5pld7vv1lbh2zdqnddtr0000gn/T/RackMultipart20230902-22901-k42nw9.png>, 
+        # @content_type="image/png", @original_filename="Screenshot 2023-09-02 at 1.47.27 PM.png", @headers="Content-Disposition: 
+        # form-data; name=\"user[profile_pic]\"; filename=\"Screenshot 2023-09-02 at 1.47.27 PM.png\"\r\nContent-Type: image/png\r\n">
+
+        # When a file is uploaded through a form, Rails stores the uploaded file in a temporary location on the server.
+        # This temporary file is represented by the tempfile attribute of the uploaded file.
+
+        # params[:user][:profile_pic].tempfile => gives you access to the temporary file that contains the uploaded data.
+        # We can use this temporary file to read, process, or manipulate the uploaded data before saving
+        # it to a permanent location or attaching it to a model.
+  
+        # Here, we can't directly pass the params[:user][:profile_pic] as an argument to the Active Job method
+        # because this profile_pic is an instance of ActionDispatch::Http::UploadedFile,
+        # and Active Job doesn't natively support this argument type for serialization.
+        # Instead, we need to pass the file path so that we can read the file using the path
+        # and use the temp file information to store the image to S3.
+  
+        # Enqueue the ImageUploaderJob to process the image upload in the background using Active Job.
+        # We pass the path to the temporary file as an argument to the job.
+        ImageUploaderJob.perform_later(user.id, temp_file.path)
+
+        # Note: Active Storage may take some time to upload the image to S3, so we use Active Job to execute
+        # that process in the background, ensuring a more responsive user experience.
+      end
+  
       render json: { data: { user: user, message: "User created successfully." } }, status: :ok
     else
       render json: { errors: user.errors }, status: :unprocessable_entity
     end
-  end
+  end  
 
   def show
     render json: { data: { user: @user.attributes.merge(profile_pic: @user.profile_pic.url ) } }, status: :ok
@@ -69,6 +98,6 @@ class Api::V1::UsersController < ApplicationController
   private
 
   def user_params
-    params.require(:user).permit(:first_name, :last_name, :email, :password, :profile_pic)
+    params.require(:user).permit(:first_name, :last_name, :email, :password)
   end
 end
